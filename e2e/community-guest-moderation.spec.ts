@@ -68,6 +68,37 @@ test('khách bấm Thích thì được đưa tới đăng nhập, không gọi 
   expect(likes).toEqual([]);
 });
 
+test('khách mở bài và bình luận trong popup, không kẹt ở khung đang tải', async ({ page }) => {
+  const { authOnly } = await openAsGuest(page, '/feed');
+  await page.route(/social\/posts\/[^/]+\/comments/, route => route.fulfill(ok(page0([]))));
+
+  await page.getByRole('button', { name: 'Bình luận', exact: true }).first().click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Sáng nay đánh đôi rất vui')).toBeVisible();
+  await expect(dialog.getByRole('button', { name: 'Đăng nhập' })).toBeVisible();
+  expect(authOnly).toEqual([]);
+});
+
+test('khách chỉ xem 10 bài, cuối danh sách mời đăng nhập thay vì cuộn tiếp', async ({ page }) => {
+  await openAsGuest(page, '/feed');
+  const sizes: string[] = [];
+  await page.route(url => url.pathname.endsWith('/social/posts'), route => {
+    const params = new URL(route.request().url()).searchParams;
+    if (!params.has('playerCallsOnly')) sizes.push(params.get('size') ?? '');
+    const posts = Array.from({ length: 10 }, (_, i) => post(`g${i}`, `Bài số ${i + 1}`));
+    return route.fulfill(ok({ ...page0(posts), totalElements: 30, totalPages: 3, last: false }));
+  });
+  await page.reload();
+
+  await expect(page.getByText('Bài số 10')).toBeVisible();
+  await page.getByRole('region', { name: 'Đăng nhập để xem thêm' }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('region', { name: 'Đăng nhập để xem thêm' })).toBeVisible();
+  await expect(page.getByText('Bài số 1', { exact: true })).toBeVisible();
+  expect(sizes.every(size => size === '10')).toBe(true);
+  expect(sizes.length).toBe(1);
+});
+
 test('người bị xử lý xem lý do ở Cộng đồng › Kiểm duyệt và gửi khiếu nại', async ({ page }) => {
   await mockGoatSportsApi(page);
   const decisions = [{

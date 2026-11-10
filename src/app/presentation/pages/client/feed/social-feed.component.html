@@ -170,7 +170,16 @@
           }
         </div>
 
-        @if (loadingMore()) {
+        @if (isGuest && hasMore()) {
+          <section class="card guest-cta" aria-label="Đăng nhập để xem thêm">
+            <span class="guest-cta__icon" aria-hidden="true"><lucide-icon name="lock" class="w-5 h-5"></lucide-icon></span>
+            <div>
+              <strong>Đăng nhập để xem thêm bài viết</strong>
+              <span>Khách xem được {{ posts().length }} bài mới nhất. Đăng nhập để cuộn tiếp, thích và bình luận.</span>
+            </div>
+            <button type="button" class="btn btn--primary" (click)="login()">Đăng nhập</button>
+          </section>
+        } @else if (loadingMore()) {
           <app-loading-skeleton variant="cards" [count]="1" minWidth="100%" label="Đang tải thêm bài viết"></app-loading-skeleton>
         } @else if (moreError()) {
           <div class="state state--inline">
@@ -180,7 +189,7 @@
         } @else if (!hasMore()) {
           <p class="feed__end"><lucide-icon name="check-circle" class="w-4 h-4"></lucide-icon>{{ tab() === 'calls' && !authorId() ? 'Bạn đã xem hết kèo đang mở' : 'Bạn đã xem hết bài viết' }}</p>
         }
-        @if (hasMore() && !moreError()) {
+        @if (!isGuest && hasMore() && !moreError()) {
           <div class="list-sentinel" appInfiniteScroll (reached)="loadMore()" aria-hidden="true"></div>
         }
       }

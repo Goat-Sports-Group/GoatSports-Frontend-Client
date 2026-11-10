@@ -22,6 +22,8 @@ import { PlayerCallVenue } from '@application/dto/social-feed/social-feed.dto';
 import { VENUE_SEARCH_REPOSITORY_TOKEN } from '@application/ports/persistence/venue-search.repository';
 
 const FEED_PAGE = PAGE_SIZE.stream;
+/** Khach chi xem trang dau, dung so bai nay; muon xem tiep phai dang nhap. */
+const GUEST_POST_LIMIT = 10;
 /** So keo trong cac the "Keo cua toi" / "Keo hop voi ban". */
 const CALL_PREVIEW = 3;
 
@@ -327,7 +329,7 @@ export class SocialFeedComponent implements OnInit, OnDestroy {
   }
 
   loadMore(): void {
-    if (!this.hasMore() || this.loading() || this.loadingMore() || this.moreError()) return;
+    if (this.isGuest || !this.hasMore() || this.loading() || this.loadingMore() || this.moreError()) return;
     this.loadingMore.set(true);
     this.request = this.fetch(this.page + 1).pipe(finalize(() => this.loadingMore.set(false))).subscribe({
       next: response => {
@@ -350,7 +352,7 @@ export class SocialFeedComponent implements OnInit, OnDestroy {
   private fetch(page: number): Observable<SpringPageResponse<SocialPost>> {
     if (this.tab() === 'saved' && !this.authorId()) return this.repository.getSavedPosts(page, FEED_PAGE);
     const authorId = this.authorId();
-    return this.repository.getFeed(page, FEED_PAGE, {
+    return this.repository.getFeed(page, this.isGuest ? GUEST_POST_LIMIT : FEED_PAGE, {
       playerCallsOnly: !authorId && this.tab() === 'calls',
       sport: this.sport(),
       sports: this.mineOnly() ? [...this.mySportSet()] : null,

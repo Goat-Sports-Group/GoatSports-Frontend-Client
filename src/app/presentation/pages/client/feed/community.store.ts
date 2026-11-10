@@ -62,6 +62,8 @@ export class CommunityStore {
   }
 
   loadConnections(): void {
+    // Khach khong co ban be; FriendApi nem loi dong bo khi thieu phien, lam hong noi goi (popup bai viet).
+    if (!this.auth.currentUser) return;
     this.connectionsLoading.set(true);
     this.connectionsError.set(false);
     forkJoin({
