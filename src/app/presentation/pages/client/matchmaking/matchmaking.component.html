@@ -449,19 +449,12 @@
           định' }}</p>
         <h2 id="criteria-title">AI chọn đối thủ thế nào?</h2>
         @if (isLearnedModel()) {
-        <p>Mô hình học từ {{ modelStatus()!.trainedSamples }} kèo đã có kết quả để dự đoán kèo nào sẽ diễn ra suôn sẻ,
-          rồi xếp hạng ứng viên theo xác suất đó.</p>
+        <p>AI học từ những trận người chơi GoatSports đã đá xong: điều gì giúp hai người chốt kèo, đến sân đúng
+          hẹn và chơi vui với nhau. Tiêu chí càng quan trọng thì thanh càng dài.</p>
         } @else {
         <p>Mỗi ứng viên được chấm trên bảy tiêu chí, cộng theo trọng số dưới đây.</p>
         }
       </header>
-      @if (isLearnedModel()) {
-      <div class="model-status is-learned">
-        <lucide-icon name="brain-circuit" class="w-5 h-5"></lucide-icon>
-        <span><strong>Độ chính xác (AUC) {{ modelStatus()!.auc | number:'1.2-2' }}</strong>
-          <small>Bản {{ modelStatus()!.version }} · tự học lại định kỳ từ kết quả kèo mới</small></span>
-      </div>
-      }
       <ol class="criteria-list">
         @for (item of criteria(); track item.key) {
         <li>

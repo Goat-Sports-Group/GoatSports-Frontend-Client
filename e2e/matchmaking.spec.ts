@@ -529,7 +529,9 @@ test('AI thật: trạng thái mô hình học máy và phân tích kèo bằng 
   learned = true;
   await page.reload();
   await expect(criteria).toContainText('Mô hình học máy');
-  await expect(criteria).toContainText('Độ chính xác (AUC) 0.74');
+  // Số mẫu, AUC, phiên bản là chuyện của backend: không hiện cho người chơi.
+  await expect(criteria).not.toContainText('AUC');
+  await expect(criteria).toContainText('AI học từ những trận');
   // Tỷ trọng lấy từ trọng số đã học: khung giờ đứng đầu.
   await expect(criteria.locator('.criteria-list li').nth(1)).toContainText('41%');
 });

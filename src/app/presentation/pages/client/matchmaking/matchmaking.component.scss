@@ -2304,25 +2304,6 @@ button:focus-visible {
   li.is-leader { border-color: var(--primary); }
 }
 
-// Trạng thái mô hình xếp hạng: chỉ hiện khi mô hình đã học xong (AUC, phiên bản).
-.model-status {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 14px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--surface-subtle);
-  color: var(--body);
-
-  > lucide-icon { flex: none; margin-top: 2px; color: var(--primary); }
-  > span { display: grid; flex: 1; gap: 3px; min-width: 0; }
-  strong { color: var(--ink); font-size: 14px; font-weight: 800; }
-  small { font-size: 12px; line-height: 1.45; }
-
-  &.is-learned { background: var(--primary-light); }
-}
-
 .ai-probability { color: var(--primary); font-weight: 800; }
 
 // Phân tích của AI (LLM chạy nền): chữ thường, không in đậm, có dòng nguồn model.
