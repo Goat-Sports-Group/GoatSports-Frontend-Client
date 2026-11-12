@@ -528,7 +528,7 @@ test('AI thật: trạng thái mô hình học máy và phân tích kèo bằng 
 
   learned = true;
   await page.reload();
-  await expect(criteria).toContainText('Mô hình học máy');
+  await expect(criteria).toContainText('Ghép trận thông minh');
   // Số mẫu, AUC, phiên bản là chuyện của backend: không hiện cho người chơi.
   await expect(criteria).not.toContainText('AUC');
   await expect(criteria).toContainText('AI học từ những trận');

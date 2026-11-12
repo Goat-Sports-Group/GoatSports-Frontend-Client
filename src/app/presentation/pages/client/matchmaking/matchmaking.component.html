@@ -445,12 +445,12 @@
     } @else {
     <section class="criteria-card" aria-labelledby="criteria-title">
       <header>
-        <p class="live-status"><span class="status-dot"></span>{{ isLearnedModel() ? 'Mô hình học máy' : 'Trọng số mặc
+        <p class="live-status"><span class="status-dot"></span>{{ isLearnedModel() ? 'Ghép trận thông minh' : 'Trọng số mặc
           định' }}</p>
         <h2 id="criteria-title">AI chọn đối thủ thế nào?</h2>
         @if (isLearnedModel()) {
         <p>AI học từ những trận người chơi GoatSports đã đá xong: điều gì giúp hai người chốt kèo, đến sân đúng
-          hẹn và chơi vui với nhau. Tiêu chí càng quan trọng thì thanh càng dài.</p>
+          hẹn và chơi vui với nhau.</p>
         } @else {
         <p>Mỗi ứng viên được chấm trên bảy tiêu chí, cộng theo trọng số dưới đây.</p>
         }
@@ -704,7 +704,8 @@
       <div class="match-progress__track" aria-hidden="true"><span class="match-progress__fill"></span></div>
       <ol class="match-progress" aria-label="Tiến trình ghép trận">
         @for (step of progressSteps(match); track step; let index = $index) {
-        <li [class.done]="progressItemState(match, index).done" [class.current]="progressItemState(match, index).current">
+        <li [class.done]="progressItemState(match, index).done"
+          [class.current]="progressItemState(match, index).current">
           {{ step }}</li>
         }
       </ol>
@@ -729,13 +730,13 @@
           <a [href]="'tel:' + venue.phone"><lucide-icon name="phone" class="w-4 h-4"></lucide-icon>{{ venue.phone }}</a>
           }
           @if (directionsUrl(venue); as url) {
-          <a [href]="url" target="_blank" rel="noopener"><lucide-icon name="navigation" class="w-4 h-4"></lucide-icon>Chỉ
+          <a [href]="url" target="_blank" rel="noopener"><lucide-icon name="navigation"
+              class="w-4 h-4"></lucide-icon>Chỉ
             đường</a>
           }
         </div>
         <button type="button" class="button button-secondary"
-          [disabled]="isHistory(match) || !isDesignatedBooker(match) || actionLoading()"
-          (click)="chooseVenue(venue)">
+          [disabled]="isHistory(match) || !isDesignatedBooker(match) || actionLoading()" (click)="chooseVenue(venue)">
           {{ isDesignatedBooker(match) ? 'Đã gọi đặt được · Chốt sân này' : 'Chờ người đặt chốt sân' }}
         </button>
       </article>
@@ -808,7 +809,8 @@
           <a [href]="'tel:' + venue.phone"><lucide-icon name="phone" class="w-4 h-4"></lucide-icon>{{ venue.phone }}</a>
           }
           @if (directionsUrl(venue); as url) {
-          <a [href]="url" target="_blank" rel="noopener"><lucide-icon name="navigation" class="w-4 h-4"></lucide-icon>Chỉ
+          <a [href]="url" target="_blank" rel="noopener"><lucide-icon name="navigation"
+              class="w-4 h-4"></lucide-icon>Chỉ
             đường</a>
           }
         </span>
