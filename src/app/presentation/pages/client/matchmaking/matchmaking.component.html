@@ -181,14 +181,6 @@
             </div>
             }
             }
-            @case ('CLUB_SIDE') {
-            <app-select ariaLabel="Câu lạc bộ thi đấu" leadingIcon="shield" [options]="clubOptions()"
-              [ngModel]="clubId()" (ngModelChange)="clubId.set($event)"></app-select>
-            <p class="party-note">
-              <lucide-icon name="shield" class="w-4 h-4"></lucide-icon>
-              Ghép CLB đấu CLB, tính ELO của CLB. Bạn hoặc một quản lý khác xác nhận, đặt sân và nhập tỷ số thay cả đội.
-            </p>
-            }
             @case ('CALL') {
             <div class="picker-empty picker-empty--call">
               <lucide-icon name="megaphone" class="w-6 h-6"></lucide-icon>
@@ -246,14 +238,9 @@
 
           <aside class="team-roster" aria-label="Đội của bạn">
             <header>
-              <strong>{{ representsClub() ? 'Đại diện CLB' : teamSize() === 2 ? 'Cặp của bạn' : 'Đội của bạn'
-                }}</strong>
-              @if (!representsClub()) { <span>{{ teammates().length + 1 }}/{{ teamSize() }}</span> }
+              <strong>{{ teamSize() === 2 ? 'Cặp của bạn' : 'Đội của bạn' }}</strong>
+              <span>{{ teammates().length + 1 }}/{{ teamSize() }}</span>
             </header>
-            @if (representsClub()) {
-            <p class="roster-note">Cả CLB {{ representedClubName() }} là một bên; thành viên thi đấu do CLB tự sắp xếp.
-            </p>
-            } @else {
             <ul class="roster">
               <li class="roster__me">
                 <span class="person__avatar" aria-hidden="true">{{ initials(currentUserName()) }}</span>
@@ -277,7 +264,6 @@
             </ul>
             <p class="roster-note">AI chỉ ghép {{ teamSize() === 2 ? 'cặp' : 'đội' }} đủ người với {{ teamSize() === 2 ?
               'cặp' : 'đội' }} cùng hình thức. Mỗi người được tính ELO riêng.</p>
-            }
           </aside>
         </div>
         }

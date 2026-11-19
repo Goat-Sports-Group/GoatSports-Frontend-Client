@@ -61,7 +61,7 @@ type Coordinates = { latitude: number; longitude: number; source: 'profile' | 'b
 type ScheduleConflict = { session: MatchmakingSession; bufferedStart: Date; bufferedEnd: Date };
 
 /** Nguồn đồng đội: thành viên một CLB mình đang ở, bạn bè, đại diện cả CLB (chủ/quản lý), hoặc đăng tìm người. */
-type TeamSource = 'CLUB_MEMBERS' | 'FRIENDS' | 'CLUB_SIDE' | 'CALL';
+type TeamSource = 'CLUB_MEMBERS' | 'FRIENDS' | 'CALL';
 type SetupStep = 'SPORT' | 'TEAM' | 'TIME' | 'PREFS';
 type PartnerOption = { userId: string; fullName: string };
 /** clubId: chọn từ danh sách thành viên CLB đó (server kiểm tra cùng CLB); null: chọn từ bạn bè. */
@@ -125,7 +125,6 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
   readonly selectedSport = signal<MatchmakingSport>('BADMINTON');
   readonly playFormat = signal('BADMINTON_SINGLES');
   /** CLB mình đại diện khi đấu CLB đấu CLB. */
-  readonly clubId = signal<string | null>(null);
   readonly friends = signal<PartnerOption[] | null>(null);
   readonly friendsLoading = signal(false);
   readonly clubMemberships = signal<MyClubMembership[] | null>(null);
@@ -147,22 +146,13 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
   /** CLB cùng môn mình đang là thành viên: nguồn đồng đội cho mọi môn, kể cả đánh đôi. */
   readonly sportClubs = computed(() => (this.clubMemberships() ?? []).filter(item =>
     item.status === 'ACTIVE' && item.club.sportType === this.selectedSport() && item.club.active !== false));
-  /** Chỉ môn đồng đội: CLB mình là chủ hoặc quản lý thì được đại diện cả CLB đấu CLB. */
-  readonly managedClubs = computed(() => this.teamSize() > 2
-    ? this.sportClubs().filter(item => item.role === 'OWNER' || item.role === 'ADMIN')
-    : []);
-  readonly representsClub = computed(() => this.teamSize() > 2 && this.teamSource() === 'CLUB_SIDE');
   readonly memberClubOptions = computed<SelectOption[]>(() =>
     this.sportClubs().map(item => ({ value: item.club.clubId, label: item.club.name })));
-  readonly clubOptions = computed<SelectOption[]>(() =>
-    this.managedClubs().map(item => ({ value: item.club.clubId, label: item.club.name })));
   readonly teamSources = computed<ReadonlyArray<{ value: TeamSource; label: string; icon: string }>>(() => [
     { value: 'CLUB_MEMBERS', label: 'Thành viên CLB', icon: 'users-round' },
     { value: 'FRIENDS', label: 'Bạn bè', icon: 'user-plus' },
-    ...(this.managedClubs().length ? [{ value: 'CLUB_SIDE' as const, label: 'Đại diện CLB', icon: 'shield' }] : []),
     { value: 'CALL', label: 'Đăng tìm người', icon: 'megaphone' }
   ]);
-  readonly representedClubName = computed(() => this.clubOptions().find(item => item.value === this.clubId())?.label ?? '');
   readonly currentUserName = computed(() => {
     const user = this.authService.currentUser;
     return user?.fullName || user?.username || 'Bạn';
@@ -182,7 +172,7 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
   readonly openSlots = computed(() =>
     Array.from({ length: Math.max(0, this.neededTeammates() - this.teammates().length) }, (_, index) => index));
   readonly teamReady = computed(() => this.teamSize() === 1
-    || (this.representsClub() ? !!this.clubId() : this.teammates().length === this.neededTeammates()));
+    || this.teammates().length === this.neededTeammates());
   readonly steps = computed(() => {
     const keys: SetupStep[] = this.teamSize() > 1 ? ['SPORT', 'TEAM', 'TIME', 'PREFS'] : ['SPORT', 'TIME', 'PREFS'];
     return keys.map(key => ({ key, label: STEP_LABELS[key], summary: this.stepSummary(key) }));
@@ -706,9 +696,6 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
     if (!clubs.some(item => item.club.clubId === this.memberClubId())) {
       this.memberClubId.set(clubs[0]?.club.clubId ?? null);
     }
-    const managed = this.managedClubs();
-    if (!managed.some(item => item.club.clubId === this.clubId())) this.clubId.set(managed[0]?.club.clubId ?? null);
-    if (this.teamSource() === 'CLUB_SIDE' && !managed.length) this.teamSource.set('FRIENDS');
     if (!this.teamSourceTouched) this.teamSource.set(clubs.length ? 'CLUB_MEMBERS' : 'FRIENDS');
     if (this.teamSource() === 'CLUB_MEMBERS' && this.memberClubId()) this.loadClubMembers(this.memberClubId()!);
   }
@@ -793,7 +780,6 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
   }
 
   private teamProblem(): string {
-    if (this.representsClub()) return 'Hãy chọn CLB mà bạn đại diện thi đấu.';
     const missing = this.neededTeammates() - this.teammates().length;
     return this.teamSize() === 2
       ? 'Đánh đôi cần chọn bạn cặp. Chưa có ai thì đăng tìm người chơi ở Cộng đồng.'
@@ -815,7 +801,6 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
     switch (key) {
       case 'SPORT': return `${this.selectedSportLabel()} · ${this.formatLabel()}`;
       case 'TEAM': {
-        if (this.representsClub()) return this.representedClubName() || 'Chọn CLB đại diện';
         return this.teamSize() === 2
           ? this.teammates()[0]?.fullName ?? 'Chưa chọn bạn cặp'
           : `${this.teammates().length + 1}/${this.teamSize()} người`;
@@ -1387,9 +1372,8 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
       winRate: profile?.winRate ?? 0,
       selectionMode: this.selectionMode(),
       playFormat: this.playFormat(),
-      partnerIds: this.teamSize() > 1 && !this.representsClub() ? this.teammates().map(item => item.userId) : undefined,
-      teammateClubId: this.representsClub() ? undefined : this.teammates().find(item => item.clubId)?.clubId ?? undefined,
-      clubId: this.representsClub() ? this.clubId() ?? undefined : undefined
+      partnerIds: this.teamSize() > 1 ? this.teammates().map(item => item.userId) : undefined,
+      teammateClubId: this.teammates().find(item => item.clubId)?.clubId ?? undefined
     };
     this.enqueue(payload);
   }
