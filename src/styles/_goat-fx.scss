@@ -42,6 +42,22 @@ html.goat-cursor *:not(input, textarea, select, [contenteditable='true']) {
   pointer-events: none;
 }
 
+// Con trỏ nằm trong top layer (popover="manual") để ở trên menu/dialog của CDK: bỏ style mặc định của popover.
+.goat-cursor-host[popover] {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.goat-cursor-host[popover]::backdrop {
+  display: none;
+}
+
 .goat-cursor-ring,
 .goat-cursor-ball {
   position: fixed;

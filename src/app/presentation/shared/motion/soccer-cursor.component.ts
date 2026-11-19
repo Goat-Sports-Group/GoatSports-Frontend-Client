@@ -41,6 +41,7 @@ const BALL_RADIUS = 11;
 export class SoccerCursorComponent implements OnDestroy {
   private readonly zone = inject(NgZone);
   private readonly document = inject(DOCUMENT);
+  private readonly host = inject(ElementRef<HTMLElement>);
   private readonly ring = viewChild.required<ElementRef<HTMLDivElement>>('ring');
   private readonly ball = viewChild.required<ElementRef<HTMLDivElement>>('ball');
   private cleanup: () => void = () => {};
@@ -61,6 +62,27 @@ export class SoccerCursorComponent implements OnDestroy {
     const ring = this.ring().nativeElement;
     const ball = this.ball().nativeElement;
     html.classList.add('goat-cursor');
+
+    // Menu/select/dialog của CDK nằm trong top layer (popover API), z-index không vượt được.
+    // Đưa con trỏ vào top layer và nâng lại lên trên cùng mỗi khi có phần tử khác mở trong top layer.
+    const host = this.host.nativeElement as HTMLElement;
+    const raise = () => {
+      try {
+        if (host.matches(':popover-open')) host.hidePopover();
+        host.showPopover();
+      } catch {
+        // Trình duyệt không hỗ trợ popover: giữ z-index như cũ.
+      }
+    };
+    const onToggle = (event: Event) => {
+      if (event.target !== host && (event as ToggleEvent).newState === 'open') raise();
+    };
+    if (typeof host.showPopover === 'function') {
+      host.setAttribute('popover', 'manual');
+      raise();
+      // 'toggle' không nổi bọt nhưng bắt được ở pha capture trên document.
+      this.document.addEventListener('toggle', onToggle, true);
+    }
 
     const pointer = { x: -100, y: -100 };
     const ringPos = { x: -100, y: -100 };
@@ -112,6 +134,7 @@ export class SoccerCursorComponent implements OnDestroy {
       window.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointerup', onUp);
       html.removeEventListener('pointerleave', onLeave);
+      this.document.removeEventListener('toggle', onToggle, true);
       html.classList.remove('goat-cursor', 'goat-cursor-visible', 'goat-cursor-hover', 'goat-cursor-text', 'goat-cursor-down');
     };
   }
