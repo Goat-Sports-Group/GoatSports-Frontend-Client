@@ -13,34 +13,34 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { AssistantLauncherService } from '@presentation/services/assistant-launcher.service';
 
 export interface MascotLines {
   hello: string;
-  hide: string;
   /** Câu nói theo trang: so khớp tiền tố đường dẫn dài nhất. */
   routes: Array<{ prefix: string; text: string }>;
   /** Câu ngẫu nhiên khi bấm vào linh vật. */
   clicks: string[];
 }
 
-const HIDDEN_KEY = 'goat-mascot-hidden';
-
 /**
- * Linh vật chibi dê GOAT đi dọc đáy màn hình: đuổi theo chuột, tự đi lang thang khi chuột đứng yên,
- * nói gợi ý theo trang hiện tại, bấm vào thì vẫy tay. Ẩn được trong phiên (sessionStorage).
- * Vị trí cập nhật trực tiếp ngoài Angular zone; chỉ trạng thái (đi/đứng, hướng, lời thoại) dùng signal.
+ * Linh vật chibi dê GOAT — cũng là nút mở GOAT AI. Đi dọc đáy màn hình: đuổi theo chuột, tự đi lang thang khi
+ * chuột đứng yên, nói gợi ý theo trang hiện tại. Bấm vào: vẫy tay và mở/đóng cửa sổ chat AI; khi chat mở thì
+ * đứng yên ở góc phải ngay dưới cửa sổ chat. Vị trí cập nhật ngoài Angular zone; trạng thái dùng signal.
  */
 @Component({
   selector: 'goat-mascot',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (!hidden()) {
-      <div #root class="goat-mascot" [class.is-walking]="walking()" [class.is-waving]="waving()">
+      <div #root class="goat-mascot" [class.is-walking]="walking()" [class.is-waving]="waving()"
+        [class.is-chat-open]="launcher.open()">
         @if (bubble(); as text) {
           <p class="goat-mascot-bubble" role="status">{{ text }}</p>
         }
         <div class="goat-mascot-body">
-          <button type="button" class="goat-mascot-figure" [style.transform]="'scaleX(' + facing() + ')'" (click)="wave()" aria-label="GOAT">
+          <button type="button" class="goat-mascot-figure" [style.transform]="'scaleX(' + facing() + ')'"
+            [style.--gm-face]="facing()" (click)="openAssistant()" aria-label="Mở trợ lý GOAT AI"
+            aria-controls="ai-assistant-dialog" [attr.aria-expanded]="launcher.open()">
             <svg viewBox="0 0 100 140" aria-hidden="true">
               <ellipse class="gm-shadow" cx="50" cy="134" rx="22" ry="4" />
               <g class="gm-bob">
@@ -59,7 +59,7 @@ const HIDDEN_KEY = 'goat-mascot-hidden';
                 </g>
                 <rect x="30" y="70" width="40" height="32" rx="11" fill="var(--primary-fill, #007a55)" />
                 <path d="M40 70 L50 78 L60 70" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round" />
-                <text x="50" y="96" text-anchor="middle" font-size="13" font-weight="900" font-style="italic" fill="#fff" font-family="Be Vietnam Pro, sans-serif">10</text>
+                <text class="gm-number" x="50" y="96" text-anchor="middle" font-size="13" font-weight="900" font-style="italic" fill="#fff" font-family="Be Vietnam Pro, sans-serif">10</text>
                 <g class="gm-limb gm-arm-r">
                   <rect x="65" y="74" width="12" height="11" rx="5" fill="var(--primary-fill, #007a55)" />
                   <rect x="66.5" y="82" width="9" height="15" rx="4.5" fill="#f5f1e8" />
@@ -89,16 +89,15 @@ const HIDDEN_KEY = 'goat-mascot-hidden';
               </g>
             </svg>
           </button>
-          <button type="button" class="goat-mascot-hide" (click)="hide()" [attr.aria-label]="lines().hide">×</button>
+          <span class="goat-mascot-presence" aria-hidden="true"></span>
         </div>
       </div>
-    }
   `
 })
 export class GoatMascotComponent {
   readonly lines = input.required<MascotLines>();
 
-  protected readonly hidden = signal(true);
+  protected readonly launcher = inject(AssistantLauncherService);
   protected readonly walking = signal(false);
   protected readonly waving = signal(false);
   protected readonly facing = signal(1);
@@ -110,18 +109,12 @@ export class GoatMascotComponent {
   private readonly destroyRef = inject(DestroyRef);
   private bubbleTimer = 0;
   private stopMoving: () => void = () => {};
+  private started = false;
   private lastSaid = new Map<string, number>();
 
   constructor() {
     afterNextRender(() => {
-      let saved: string | null = null;
-      try {
-        saved = sessionStorage.getItem(HIDDEN_KEY);
-      } catch {
-        // sessionStorage có thể bị chặn: coi như chưa ẩn.
-      }
-      if (saved === '1') return;
-      this.hidden.set(false);
+      this.started = true;
       setTimeout(() => {
         this.zone.runOutsideAngular(() => this.startMoving());
         this.say(this.lines().hello);
@@ -142,21 +135,17 @@ export class GoatMascotComponent {
     });
   }
 
-  protected wave(): void {
-    const clicks = this.lines().clicks;
+  /** Bấm linh vật: vẫy tay và mở/đóng GOAT AI. */
+  protected openAssistant(): void {
     this.waving.set(true);
-    this.say(clicks[Math.floor(Math.random() * clicks.length)]);
-    setTimeout(() => this.waving.set(false), 1400);
-  }
-
-  protected hide(): void {
-    this.stopMoving();
-    this.hidden.set(true);
-    try {
-      sessionStorage.setItem(HIDDEN_KEY, '1');
-    } catch {
-      // Không lưu được thì chỉ ẩn tới khi tải lại trang.
+    setTimeout(() => this.waving.set(false), 1200);
+    if (!this.launcher.open()) {
+      const clicks = this.lines().clicks;
+      this.say(clicks[Math.floor(Math.random() * clicks.length)], 2500);
+    } else {
+      this.bubble.set(null);
     }
+    this.launcher.toggle();
   }
 
   private say(text: string, ms = 4000): void {
@@ -167,7 +156,7 @@ export class GoatMascotComponent {
 
   /** Nói câu của trang hiện tại (tiền tố dài nhất), không lặp lại cùng câu trong 2 phút. */
   private sayForRoute(url: string): void {
-    if (this.hidden()) return;
+    if (!this.started) return;
     const path = url.split(/[?#]/)[0];
     const match = this.lines()
       .routes.filter((route) => path === route.prefix || path.startsWith(route.prefix + '/') || route.prefix === '/')
@@ -193,12 +182,12 @@ export class GoatMascotComponent {
     let walkingNow = false;
     let face = 1;
     const onPointer = (event: PointerEvent) => {
-      if (event.pointerType !== 'mouse') return;
+      if (event.pointerType !== 'mouse' || this.launcher.open()) return;
       target = clamp(event.clientX - size() / 2);
       lastPointer = performance.now();
     };
     const wander = window.setInterval(() => {
-      if (performance.now() - lastPointer > 4000) target = clamp(Math.random() * window.innerWidth);
+      if (!this.launcher.open() && performance.now() - lastPointer > 4000) target = clamp(Math.random() * window.innerWidth);
     }, 5000);
 
     let prev = performance.now();
@@ -206,6 +195,7 @@ export class GoatMascotComponent {
     const loop = (now: number) => {
       const dt = Math.min((now - prev) / 1000, 0.05);
       prev = now;
+      if (this.launcher.open()) target = clamp(window.innerWidth);
       const dx = target - pos;
       const moving = Math.abs(dx) > 3;
       if (moving) {

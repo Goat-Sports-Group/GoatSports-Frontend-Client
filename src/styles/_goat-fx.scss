@@ -6,6 +6,34 @@
 // Tất cả tắt khi người dùng bật giảm chuyển động.
 // ================================================================================================
 
+// ---- Lenis (bản sao lenis/dist/lenis.css, bắt buộc để cuộn mượt không giật) ---------------------
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
+
 // ---- Hiện dần khi cuộn -------------------------------------------------------------------------
 [data-goat-reveal='rise']:not(.goat-revealed) {
   opacity: 0;
@@ -203,25 +231,28 @@ html.goat-cursor-text {
   }
 }
 
-.goat-mascot-hide {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  display: none;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border: 1px solid var(--hairline);
-  border-radius: 999px;
-  background: var(--surface-raised);
-  color: var(--body);
-  font-size: 14px;
-  line-height: 1;
+.goat-mascot-figure {
+  cursor: pointer;
 }
 
-.goat-mascot-body:hover .goat-mascot-hide,
-.goat-mascot-hide:focus-visible {
-  display: grid;
+// Chấm "đang trực tuyến" của GOAT AI, giống nút chat cũ.
+.goat-mascot-presence {
+  position: absolute;
+  top: 18%;
+  right: 16%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 999px;
+  background: #22c55e;
+  pointer-events: none;
+}
+
+// Cả hình bị lật (scaleX) khi đi sang trái: lật ngược số áo lại để luôn đọc là "10".
+.gm-number {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleX(var(--gm-face, 1));
 }
 
 .gm-shadow {

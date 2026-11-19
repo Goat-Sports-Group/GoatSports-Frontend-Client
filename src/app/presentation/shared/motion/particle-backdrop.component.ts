@@ -219,7 +219,8 @@ export class ParticleBackdropComponent implements OnDestroy {
   private start(THREE: typeof Three): void {
     const container = this.host.nativeElement as HTMLElement;
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    // Nền trang trí: độ phân giải 1x là đủ, nhẹ GPU hơn nhiều so với 1.5x–2x.
+    renderer.setPixelRatio(1);
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     container.appendChild(renderer.domElement);
@@ -255,13 +256,21 @@ export class ParticleBackdropComponent implements OnDestroy {
     };
     window.addEventListener('pointermove', onPointer, { passive: true });
 
+    // Đang cuộn (cửa sổ hoặc vùng cuộn bên trong) thì không vẽ, nhường GPU cho cuộn; vẽ tối đa 30 khung hình/giây.
+    let scrollingUntil = 0;
+    const onScroll = () => (scrollingUntil = performance.now() + 180);
+    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+
     const reduced = reducedMotion();
     const startedAt = performance.now();
     let frame = 0;
-    const loop = () => {
-      content.update((performance.now() - startedAt) / 1000, pointer);
-      render();
+    let lastDraw = 0;
+    const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
+      if (now < scrollingUntil || now - lastDraw < 33) return;
+      lastDraw = now;
+      content.update((now - startedAt) / 1000, pointer);
+      render();
     };
     content.update(0, pointer);
     const visibility = new IntersectionObserver(([entry]) => {
@@ -276,6 +285,7 @@ export class ParticleBackdropComponent implements OnDestroy {
       resizeObserver.disconnect();
       themeObserver.disconnect();
       window.removeEventListener('pointermove', onPointer);
+      window.removeEventListener('scroll', onScroll, { capture: true });
       content.dispose();
       renderer.dispose();
       renderer.domElement.remove();

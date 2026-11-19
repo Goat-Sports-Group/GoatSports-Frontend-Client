@@ -1,5 +1,6 @@
-import { AfterViewChecked, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, ViewChild, effect } from '@angular/core';
 import { Router } from '@angular/router';
+import { AssistantLauncherService } from '@presentation/services/assistant-launcher.service';
 import { AiRepositoryPort } from '@application/ports/ai.repository.port';
 import { ChatbotCardModel, ChatbotSourceModel } from '@application/dto/chat/chat.dto';
 
@@ -38,7 +39,10 @@ export const CARD_ICON: Record<ChatbotCardModel['kind'], string> = {
 })
 export class AiAssistantModalComponent implements AfterViewChecked {
 
-  isOpen = false;
+  /** Mở/đóng do linh vật dê (nút mở chat) và hộp thoại cùng điều khiển. */
+  get isOpen(): boolean {
+    return this.launcher.open();
+  }
   inputText = '';
   loading = false;
   readonly cardIcon = CARD_ICON;
@@ -58,8 +62,14 @@ export class AiAssistantModalComponent implements AfterViewChecked {
 
   constructor(
     private readonly aiRepo: AiRepositoryPort,
-    private readonly router: Router
-  ) { }
+    private readonly router: Router,
+    private readonly launcher: AssistantLauncherService
+  ) {
+    // Mở lại thì cuộn tới tin mới nhất.
+    effect(() => {
+      if (this.launcher.open()) this.scrollPending = true;
+    });
+  }
 
   ngAfterViewChecked(): void {
     if (!this.scrollPending || !this.messageList) return;
@@ -69,16 +79,15 @@ export class AiAssistantModalComponent implements AfterViewChecked {
   }
 
   toggleChat(): void {
-    this.isOpen = !this.isOpen;
-    if (this.isOpen) this.scrollPending = true;
+    this.launcher.toggle();
   }
 
   minimizeChat(): void {
-    this.isOpen = false;
+    this.launcher.close();
   }
 
   closeChat(): void {
-    this.isOpen = false;
+    this.launcher.close();
     this.inputText = '';
   }
 
@@ -136,7 +145,7 @@ export class AiAssistantModalComponent implements AfterViewChecked {
       window.open(card.link, '_blank', 'noopener');
       return;
     }
-    this.isOpen = false;
+    this.launcher.close();
     this.router.navigateByUrl(card.link);
   }
 

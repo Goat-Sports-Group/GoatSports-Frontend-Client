@@ -2358,3 +2358,8 @@ button:focus-visible {
   text-decoration: none;
 }
 .venue-proposal--offline { cursor: default; }
+
+// Nút hủy trận trước khi đặt cọc: tách khỏi hàng nút chính.
+.match-cancel {
+  margin-top: 10px;
+}

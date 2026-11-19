@@ -5,6 +5,7 @@ import { HighlightShareDialogComponent } from '@presentation/pages/client/feed/h
 import { PostHighlightComponent } from '@presentation/pages/client/feed/post-highlight.component';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '@shared/shared.module';
+import { GoatMascotComponent } from '@shared/motion/goat-mascot.component';
 import { ClientRoutingModule } from './routes/client-routing.module';
 
 import { ClientComponent } from '@shared/layouts/client/client.component';
@@ -133,6 +134,7 @@ import { AiAssistantModalComponent } from '@presentation/shared/components/ai-as
   imports: [
     CommonModule,
     SharedModule,
+    GoatMascotComponent,
     VenueFacilityLayoutViewComponent,
     ClientRoutingModule
   ]

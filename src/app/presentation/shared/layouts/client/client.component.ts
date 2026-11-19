@@ -6,6 +6,7 @@ import { User } from '@application/dto/user/user.dto';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
 import { GoatMotionService } from '@shared/motion/goat-motion.service';
+import { CLIENT_MASCOT_LINES } from '@shared/motion/client-mascot-lines';
 
 @Component({
     selector: 'app-client',
@@ -43,6 +44,7 @@ export class ClientComponent implements OnInit, OnDestroy {
   isAuthenticated$!: Observable<boolean>;
   currentUser: User | null = null;
   adminUrl = environment.adminApiUrl;
+  readonly mascotLines = CLIENT_MASCOT_LINES;
 
   ngOnInit() {
     this.isAuthenticated$ = this.authService.isAuthenticated$;

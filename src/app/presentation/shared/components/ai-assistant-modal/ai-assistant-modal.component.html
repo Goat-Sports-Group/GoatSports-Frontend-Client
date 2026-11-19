@@ -1,16 +1,4 @@
-<button
-  type="button"
-  class="floating-ai-btn"
-  [class.is-open]="isOpen"
-  aria-label="Mở trợ lý GOAT AI"
-  [attr.aria-expanded]="isOpen"
-  aria-controls="ai-assistant-dialog"
-  (click)="toggleChat()"
->
-  <span class="chat-head-mark"><img src="assets/images/goat-mark.webp" alt="" width="46" height="46" class="assistant-logo"></span>
-  <span class="chat-head-presence" aria-hidden="true"></span>
-  <span class="sr-only">GOAT AI đang trực tuyến</span>
-</button>
+<!-- Nút mở chat là linh vật dê (GoatMascotComponent trong layout client). -->
 
 <section
   id="ai-assistant-dialog"

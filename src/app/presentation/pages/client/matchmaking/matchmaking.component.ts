@@ -1053,6 +1053,33 @@ export class MatchmakingComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /** Nút "Hủy trận" lần đầu chỉ chuyển sang chờ xác nhận; bấm lại trong 4 giây mới hủy thật. */
+  readonly cancelArmed = signal(false);
+  private cancelArmTimer = 0;
+
+  /**
+   * Hủy được khi chưa đặt cọc: đang chọn sân (ACCEPTED) hoặc đã chọn sân nhưng chưa thanh toán (VENUE_SELECTED) —
+   * đúng các trạng thái ai-service cho hủy. Khi không tìm được sân, khối báo lỗi đã có nút "Hủy kèo & đổi lịch".
+   */
+  canCancelBeforeDeposit(m: MatchmakingSession): boolean {
+    if (this.isHistory(m) || (m.status !== 'ACCEPTED' && m.status !== 'VENUE_SELECTED')) return false;
+    const searchStatus = m.proposal?.venueSearchStatus;
+    const searchFailed = m.status === 'ACCEPTED' && !m.proposal?.venueOptions?.length
+      && !!searchStatus && searchStatus !== 'PENDING';
+    return !searchFailed;
+  }
+
+  confirmCancelMatch(): void {
+    clearTimeout(this.cancelArmTimer);
+    if (!this.cancelArmed()) {
+      this.cancelArmed.set(true);
+      this.cancelArmTimer = window.setTimeout(() => this.cancelArmed.set(false), 4000);
+      return;
+    }
+    this.cancelArmed.set(false);
+    this.cancelMatch();
+  }
+
   cancelMatch(): void {
     const match = this.session();
     if (!match || this.actionLoading()) return;

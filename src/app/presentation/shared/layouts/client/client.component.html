@@ -64,6 +64,8 @@
       <app-footer></app-footer>
     }
     <app-ai-assistant-modal></app-ai-assistant-modal>
+    <!-- Linh vật dê là nút mở GOAT AI. -->
+    <goat-mascot [lines]="mascotLines" />
     <!-- Bong bong chat kieu Facebook: ai nhan tin toi thi hien avatar tren nut GOAT AI (an o trang Tin nhan). -->
     @if (isAuthenticated$ | async) {
       <app-chat-heads></app-chat-heads>

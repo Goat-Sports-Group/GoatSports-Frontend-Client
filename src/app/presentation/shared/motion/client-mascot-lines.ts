@@ -1,9 +1,8 @@
 import { MascotLines } from './goat-mascot.component';
 
-/** Lời thoại của linh vật dê trên app người chơi (khách + người chơi), theo tiền tố đường dẫn. */
+/** Lời thoại của linh vật dê (cũng là nút mở GOAT AI) trên app người chơi (khách + người chơi), theo tiền tố đường dẫn. */
 export const CLIENT_MASCOT_LINES: MascotLines = {
-  hello: 'Chào bạn! Mình là GOAT 🐐',
-  hide: 'Ẩn linh vật',
+  hello: 'Chào bạn! Mình là GOAT AI 🐐 Bấm vào mình để hỏi nhé!',
   routes: [
     { prefix: '/home', text: 'Hôm nay ra sân không? Xem lịch và kèo hợp với bạn nè.' },
     { prefix: '/venues', text: 'Lọc theo môn, khu vực, giờ trống để tìm sân nhanh nhé!' },
@@ -29,6 +28,7 @@ export const CLIENT_MASCOT_LINES: MascotLines = {
     { prefix: '/policy', text: 'Chính sách và điều khoản của GOAT Sports.' }
   ],
   clicks: [
+    'Hỏi mình gì cũng được nè!',
     'Sẵn sàng ra sân chưa? ⚽',
     'GOAT = Greatest Of All Time 🐐',
     'Cuối tuần đá một trận không?',

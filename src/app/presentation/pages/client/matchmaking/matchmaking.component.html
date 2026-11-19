@@ -887,6 +887,14 @@
         Mở trò chuyện
       </button>
     </div>
+    @if (canCancelBeforeDeposit(match)) {
+    <!-- Trước khi đặt cọc xong (đang chọn sân / đã chọn sân), một trong hai bên được hủy trận; bấm hai lần để tránh lỡ tay. -->
+    <button type="button" class="button button-danger button-full match-cancel" [disabled]="actionLoading()"
+      (click)="confirmCancelMatch()">
+      <lucide-icon name="circle-x" class="w-5 h-5"></lucide-icon>
+      {{ cancelArmed() ? 'Bấm lần nữa để hủy trận' : 'Hủy trận' }}
+    </button>
+    }
     } @else if ((match.status === 'CHECKED_IN' || match.status === 'RESULT_PENDING' || match.status === 'DISPUTED')
     && !canEnterResult(match)) {
     <p class="result-deadline-note" data-state="WAITING_OPPONENT">

@@ -111,7 +111,8 @@ input {
 .ai-chat-window {
   position: fixed;
   right: max(22px, env(safe-area-inset-right));
-  bottom: max(96px, calc(env(safe-area-inset-bottom) + 86px));
+  // Chừa chỗ cho linh vật dê (nút mở chat) đứng ở góc dưới phải.
+  bottom: max(150px, calc(env(safe-area-inset-bottom) + 140px));
   z-index: var(--assistant-layer-window);
   width: min(382px, calc(100vw - 32px));
   height: min(600px, calc(100dvh - 124px));
