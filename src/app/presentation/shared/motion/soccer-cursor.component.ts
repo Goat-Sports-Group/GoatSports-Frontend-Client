@@ -6,15 +6,14 @@ const TEXT_FIELD = 'input:not([type="checkbox"]):not([type="radio"]):not([type="
 const BALL_RADIUS = 11;
 
 /**
- * Con trỏ quả bóng đá: bóng bám sát chuột và lăn theo quãng đường đi, vòng viền màu primary đuổi theo.
- * Rê vào link/nút: vòng to ra, bóng nhỏ lại. Rê vào ô nhập chữ: ẩn bóng, hiện con trỏ gõ chữ của hệ thống.
+ * Con trỏ quả bóng đá: bóng bám sát chuột và lăn theo quãng đường đi.
+ * Rê vào link/nút: bóng nhỏ lại. Rê vào ô nhập chữ: ẩn bóng, hiện con trỏ gõ chữ của hệ thống.
  * Chỉ bật với chuột (pointer: fine); cập nhật style trực tiếp ngoài Angular zone.
  */
 @Component({
   selector: 'goat-soccer-cursor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div #ring class="goat-cursor-ring" aria-hidden="true"></div>
     <div #ball class="goat-cursor-ball" aria-hidden="true">
       <svg viewBox="-50 -50 100 100" width="22" height="22">
         <defs>
@@ -42,7 +41,6 @@ export class SoccerCursorComponent implements OnDestroy {
   private readonly zone = inject(NgZone);
   private readonly document = inject(DOCUMENT);
   private readonly host = inject(ElementRef<HTMLElement>);
-  private readonly ring = viewChild.required<ElementRef<HTMLDivElement>>('ring');
   private readonly ball = viewChild.required<ElementRef<HTMLDivElement>>('ball');
   private cleanup: () => void = () => {};
 
@@ -59,7 +57,6 @@ export class SoccerCursorComponent implements OnDestroy {
 
   private start(): void {
     const html = this.document.documentElement;
-    const ring = this.ring().nativeElement;
     const ball = this.ball().nativeElement;
     html.classList.add('goat-cursor');
 
@@ -85,7 +82,6 @@ export class SoccerCursorComponent implements OnDestroy {
     }
 
     const pointer = { x: -100, y: -100 };
-    const ringPos = { x: -100, y: -100 };
     let angle = 0;
     let visible = false;
     let frame = 0;
@@ -99,8 +95,6 @@ export class SoccerCursorComponent implements OnDestroy {
       pointer.y = event.clientY;
       if (!visible) {
         visible = true;
-        ringPos.x = pointer.x;
-        ringPos.y = pointer.y;
         html.classList.add('goat-cursor-visible');
       }
       const target = event.target as Element | null;
@@ -115,10 +109,7 @@ export class SoccerCursorComponent implements OnDestroy {
     const onUp = () => html.classList.remove('goat-cursor-down');
 
     const loop = () => {
-      ringPos.x += (pointer.x - ringPos.x) * 0.18;
-      ringPos.y += (pointer.y - ringPos.y) * 0.18;
       ball.style.transform = `translate3d(${pointer.x}px, ${pointer.y}px, 0) rotate(${angle}deg)`;
-      ring.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0)`;
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
