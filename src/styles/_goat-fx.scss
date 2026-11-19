@@ -1,0 +1,323 @@
+// ================================================================================================
+// GOAT FX: hiệu ứng mang từ portfolio (GOAT-DESIGN.md §8 Motion — "FX").
+// - Hiện dần khi cuộn: GoatMotionService gắn data-goat-reveal="rise|flip" cho khối chưa nằm trong màn hình,
+//   thêm .goat-revealed khi khối cuộn tới. Dùng `translate`/`rotate` (thuộc tính riêng) để không đè transform.
+// - Con trỏ quả bóng đá (SoccerCursorComponent) + linh vật dê (GoatMascotComponent).
+// Tất cả tắt khi người dùng bật giảm chuyển động.
+// ================================================================================================
+
+// ---- Hiện dần khi cuộn -------------------------------------------------------------------------
+[data-goat-reveal='rise']:not(.goat-revealed) {
+  opacity: 0;
+  translate: 0 32px;
+}
+
+[data-goat-reveal='flip']:not(.goat-revealed) {
+  opacity: 0;
+  translate: 0 20px;
+  rotate: x 75deg;
+}
+
+[data-goat-reveal='flip'] {
+  transform-origin: 50% 100%;
+}
+
+[data-goat-reveal].goat-revealed {
+  transition:
+    opacity 0.8s var(--ease-layout),
+    translate 0.9s var(--ease-layout),
+    rotate 0.9s var(--ease-layout);
+}
+
+// ---- Con trỏ quả bóng --------------------------------------------------------------------------
+html.goat-cursor,
+html.goat-cursor *:not(input, textarea, select, [contenteditable='true']) {
+  cursor: none !important;
+}
+
+.goat-cursor-host {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+}
+
+.goat-cursor-ring,
+.goat-cursor-ball {
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.goat-cursor-ring {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border: 2px solid color-mix(in srgb, var(--primary) 65%, transparent);
+  border-radius: 999px;
+  transition:
+    opacity 0.2s,
+    width 0.3s var(--ease-layout),
+    height 0.3s var(--ease-layout),
+    margin 0.3s var(--ease-layout),
+    background-color 0.3s;
+}
+
+.goat-cursor-ball {
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 35%));
+  transition: opacity 0.2s;
+
+  svg {
+    display: block;
+    transition: scale 0.2s var(--ease-standard);
+  }
+}
+
+html.goat-cursor-visible {
+  .goat-cursor-ring,
+  .goat-cursor-ball {
+    opacity: 1;
+  }
+}
+
+html.goat-cursor-hover .goat-cursor-ring {
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+html.goat-cursor-hover .goat-cursor-ball svg {
+  scale: 0.7;
+}
+
+html.goat-cursor-down .goat-cursor-ball svg {
+  scale: 0.55;
+}
+
+// Ô nhập chữ: ẩn bóng + vòng, dùng con trỏ gõ chữ của hệ thống.
+html.goat-cursor-text {
+  .goat-cursor-ring,
+  .goat-cursor-ball {
+    opacity: 0;
+  }
+}
+
+// ---- Linh vật dê -------------------------------------------------------------------------------
+.goat-mascot {
+  position: fixed;
+  bottom: 4px;
+  left: 0;
+  z-index: 900; // trên nội dung, dưới lớp phủ CDK (1000) để dialog/menu che được
+  width: 64px;
+  pointer-events: none;
+  will-change: transform;
+
+  @media (min-width: 640px) {
+    width: 92px;
+  }
+}
+
+.goat-mascot-bubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: max-content;
+  max-width: 230px;
+  margin: 0 0 6px;
+  padding: 8px 14px;
+  translate: -50% 0;
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 12px 32px -12px rgb(0 0 0 / 45%);
+  animation: goat-bubble-in 0.35s var(--ease-layout) both;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    width: 11px;
+    height: 11px;
+    translate: -50% 0;
+    rotate: 45deg;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    background: var(--surface-raised);
+  }
+}
+
+@keyframes goat-bubble-in {
+  from {
+    opacity: 0;
+    translate: -50% 10px;
+    scale: 0.85;
+  }
+}
+
+.goat-mascot-body {
+  position: relative;
+  pointer-events: auto;
+}
+
+.goat-mascot-figure {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.goat-mascot-hide {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: none;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--body);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.goat-mascot-body:hover .goat-mascot-hide,
+.goat-mascot-hide:focus-visible {
+  display: grid;
+}
+
+.gm-shadow {
+  fill: rgb(0 0 0 / 28%);
+}
+
+.gm-limb {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.gm-eyes,
+.gm-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.goat-mascot .gm-eyes {
+  animation: gm-blink 4s infinite;
+}
+
+.goat-mascot .gm-bob {
+  animation: gm-breathe 2.4s ease-in-out infinite;
+}
+
+.goat-mascot.is-walking {
+  .gm-bob {
+    animation: gm-bob 0.22s ease-in-out infinite alternate;
+  }
+
+  .gm-shadow {
+    animation: gm-shadow 0.22s ease-in-out infinite alternate;
+  }
+
+  .gm-leg-l,
+  .gm-arm-r {
+    animation: gm-swing 0.44s ease-in-out infinite alternate;
+  }
+
+  .gm-leg-r,
+  .gm-arm-l {
+    animation: gm-swing 0.44s ease-in-out infinite alternate-reverse;
+  }
+}
+
+.goat-mascot.is-waving .gm-arm-r {
+  animation: gm-wave 0.28s ease-in-out infinite alternate;
+}
+
+@keyframes gm-swing {
+  from {
+    transform: rotate(-24deg);
+  }
+  to {
+    transform: rotate(24deg);
+  }
+}
+
+@keyframes gm-bob {
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes gm-shadow {
+  to {
+    transform: scaleX(0.85);
+  }
+}
+
+@keyframes gm-breathe {
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+@keyframes gm-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes gm-wave {
+  from {
+    transform: rotate(-160deg);
+  }
+  to {
+    transform: rotate(-125deg);
+  }
+}
+
+// In ra giấy hoặc giảm chuyển động: không hiệu ứng, không con trỏ/linh vật.
+@media (prefers-reduced-motion: reduce) {
+  [data-goat-reveal]:not(.goat-revealed) {
+    opacity: 1;
+    translate: none;
+    rotate: none;
+  }
+
+  .goat-mascot * {
+    animation: none !important;
+  }
+}
+
+@media print {
+  .goat-cursor-host,
+  .goat-mascot {
+    display: none !important;
+  }
+}

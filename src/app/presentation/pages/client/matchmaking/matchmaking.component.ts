@@ -94,6 +94,8 @@ const OFFLINE_PROGRESS_STEPS = ['Ghép đối thủ', 'Xác nhận', 'Chọn sâ
 
 @Component({
   selector: 'app-matchmaking',
+  // Trang đã có chuyển động GSAP riêng: không tự gắn hiệu ứng hiện dần (tránh chồng hiệu ứng).
+  host: { 'data-no-reveal': '' },
   templateUrl: './matchmaking.component.html',
   styleUrls: ['./matchmaking.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

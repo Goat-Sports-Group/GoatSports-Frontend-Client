@@ -10,6 +10,23 @@
   color: var(--body);
 }
 
+.app-footer {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+// Mặt sóng hạt 3D phía sau nội dung footer.
+.footer-fx {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  display: block;
+  height: 75%;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 50%);
+  opacity: .7;
+}
+
 .app-footer::before {
   position: absolute;
   top: -1px;

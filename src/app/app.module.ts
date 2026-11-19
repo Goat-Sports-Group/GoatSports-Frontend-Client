@@ -8,6 +8,8 @@ import { AppComponent } from './app.component';
 import { ApiInterceptor } from './presentation/interceptors/api.interceptor';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NotifyComponent } from '@shared/components/notify/notify.component';
+import { GoatMascotComponent } from '@shared/motion/goat-mascot.component';
+import { SoccerCursorComponent } from '@shared/motion/soccer-cursor.component';
 
 import { AUTH_REPOSITORY_TOKEN } from '@application/ports/persistence/auth.repository';
 import { NOTIFICATION_REPOSITORY_TOKEN } from '@application/ports/persistence/notification.repository';
@@ -241,7 +243,9 @@ import {
     AppRoutingModule,
     BrowserAnimationsModule,
     MatProgressSpinnerModule,
-    NotifyComponent
+    NotifyComponent,
+    GoatMascotComponent,
+    SoccerCursorComponent
   ],
   providers: [
     {

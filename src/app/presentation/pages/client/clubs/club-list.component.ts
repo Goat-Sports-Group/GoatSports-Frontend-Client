@@ -30,6 +30,8 @@ import {
 
 @Component({
   selector: 'app-club-list',
+  // Trang đã có chuyển động GSAP riêng: không tự gắn hiệu ứng hiện dần (tránh chồng hiệu ứng).
+  host: { 'data-no-reveal': '' },
   templateUrl: './club-list.component.html',
   styleUrls: ['./club-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

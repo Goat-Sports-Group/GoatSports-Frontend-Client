@@ -29,6 +29,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 
 import { HeaderComponent } from '@shared/components/header/header.component';
 import { FooterComponent } from '@shared/components/footer/footer.component';
+import { ParticleBackdropComponent } from '@shared/motion/particle-backdrop.component';
 import { StarRatingComponent } from '@shared/components/star-rating/star-rating.component';
 import { LoadingSkeletonComponent } from '@shared/components/loading-skeleton/loading-skeleton.component';
 import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
@@ -95,6 +96,7 @@ const COMPONENT_DECLARATIONS = [
     PaginationComponent,
     FormFieldComponent,
     DatePickerComponent,
+    ParticleBackdropComponent,
     ...MATERIAL_MODULES
   ],
   exports: [
@@ -107,6 +109,7 @@ const COMPONENT_DECLARATIONS = [
     PaginationComponent,
     FormFieldComponent,
     DatePickerComponent,
+    ParticleBackdropComponent,
     ...MATERIAL_MODULES,
     ...COMPONENT_DECLARATIONS
   ]

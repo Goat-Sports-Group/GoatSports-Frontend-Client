@@ -55,6 +55,8 @@ export type VenueOrder = 'forYou' | 'nearest';
 
 @Component({
   selector: 'app-home',
+  // Trang đã có chuyển động GSAP riêng: không tự gắn hiệu ứng hiện dần (tránh chồng hiệu ứng).
+  host: { 'data-no-reveal': '' },
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   standalone: false
